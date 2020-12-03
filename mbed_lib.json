@@ -12,18 +12,6 @@
         "storage-locations": {
             "help": "Number of equally sized locations the storage space should be split into.",
             "value": "1"
-        },        
-        "max-application-size": {
-            "help": "Maximum size of the active application.",
-            "value": "DEFAULT_MAX_APPLICATION_SIZE"
-        },
-        "firmware-header-version": {
-            "help": "Version of the firmware metadata header.",
-            "value": "2"
-        },
-        "firmware-header-size": {
-            "help": "Size of the firmware metadata header.",
-            "value": "0x80"
         }
     }
 }

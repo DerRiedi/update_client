@@ -14,9 +14,14 @@ public:
   ~CandidateApplications();
 
   MbedApplication& getMbedApplication(uint32_t slotIndex);
+  uint32_t getSlotForCandidate();
   int32_t getApplicationAddress(uint32_t slotIndex, uint32_t& applicationAddress, uint32_t& slotSize) const;
   bool hasValidNewerApplication(MbedApplication& activeApplication, uint32_t& newestSlotIndex) const;
+  // the installApplication method is used by the bootloader application
+  // (for which the POST_APPLICATION_ADDR symbol is defined)
+#if defined(POST_APPLICATION_ADDR)
   int32_t installApplication(uint32_t slotIndex, uint32_t destHeaderAddress);
+#endif
 
 private:
   FlashUpdater& m_flashUpdater;

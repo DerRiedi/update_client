@@ -11,7 +11,8 @@ class MbedApplication {
 public:
   MbedApplication(FlashUpdater& flashUpdater, uint32_t applicationHeaderAddress, uint32_t applicationAddress);
 
-  uint64_t getVersion();
+  bool isValid();
+  uint64_t getFirmwareVersion();
   uint64_t getFirmwareSize();
   bool isNewerThan(MbedApplication& otherApplication);
   int32_t checkApplication();
@@ -58,12 +59,13 @@ private:
   };
   ApplicationHeader m_applicationHeader;
 
+  // the size and offsets defined below do not correspond to the 
+  // application header defined above but rather to the definition in
+  // the mbed_lib.json file
   // constants defining the header
   static const uint32_t HEADER_VERSION_V2 = 2;
   static const uint32_t HEADER_MAGIC_V2 = 0x5a51b3d4UL;
   static const uint32_t HEADER_SIZE_V2 = 112;
-  // these offsets apply starting after header version 
-  // offsets must account for the size of the field itself
   static const uint32_t FIRMWARE_VERSION_OFFSET_V2 = 8;
   static const uint32_t FIRMWARE_SIZE_OFFSET_V2 = 16;
   static const uint32_t HASH_OFFSET_V2 = 24;
