@@ -93,7 +93,7 @@ void USBSerialUC::downloadFirmware() {
         
         // update progress
         nbrOfBytes += pageSize;
-        printf("Received %05d bytes\r", nbrOfBytes);
+        printf("Received %05u bytes\r", nbrOfBytes);
       }
       
       // compare the active application with the downloaded one

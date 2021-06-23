@@ -16,7 +16,6 @@ MbedApplication::MbedApplication(FlashUpdater& flashUpdater, uint32_t applicatio
   m_flashUpdater(flashUpdater),
   m_applicationHeaderAddress(applicationHeaderAddress),
   m_applicationAddress(applicationAddress) {
-  memset(m_buffer, 0, sizeof(m_buffer));
   memset((void*) &m_applicationHeader, 0, sizeof(m_applicationHeader));
   m_applicationHeader.initialized = false;
   m_applicationHeader.state = NOT_CHECKED;
@@ -248,10 +247,30 @@ int32_t MbedApplication::readApplicationHeader() {
     tr_debug(" Magic %d, Version %d", m_applicationHeader.magic, m_applicationHeader.headerVersion);
     
     // choose version to decode 
-    // TODO: the code below MUST be IMPLEMENTED
     switch (m_applicationHeader.headerVersion) {
       case HEADER_VERSION_V2: {
-        // TODO 
+        result = UC_ERR_NONE;
+        // Check the header magic
+        if (m_applicationHeader.magic == HEADER_MAGIC_V2) {
+          uint8_t read_buffer[HEADER_SIZE_V2] = { 0 };
+          // read the rest of header (V2)
+          err = m_flashUpdater.read(read_buffer, m_applicationHeaderAddress, HEADER_SIZE_V2);
+          if (err == 0) {
+            // parse the header
+            result = parseInternalHeaderV2(read_buffer);
+            if (result != UC_ERR_NONE) {
+              tr_error(" Failed to parse header: %d", result);
+            }
+          }
+          else {
+            tr_error("Flash read failed: %d", err);
+            result = UC_ERR_READING_FLASH;
+          }
+        }
+        else {
+          tr_error(" Invalid magic number");
+          result = UC_ERR_INVALID_HEADER;
+        }
       }   
       break;
 
