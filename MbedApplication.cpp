@@ -168,12 +168,12 @@ void MbedApplication::compareTo(MbedApplication& otherApplication) {
   int32_t result = checkApplication();
   if (result != UC_ERR_NONE) {
     tr_error(" Application not valid");
-    //return;
+    return;
   }
   result = otherApplication.checkApplication();
   if (result != UC_ERR_NONE) {
     tr_error(" Other application not valid");
-    //return;
+    return;
   }
   tr_debug(" Both applications are valid");
 
