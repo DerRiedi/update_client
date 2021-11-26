@@ -12,6 +12,8 @@
 namespace update_client {
 
 
+#if defined(UPDATE_DOWNLOAD)
+
 USBSerialUC::USBSerialUC() :
   m_usbSerial(false) {
   
@@ -116,7 +118,8 @@ void USBSerialUC::downloadFirmware() {
 
   }
 
-  
 }
+
+#endif
 
 }
