@@ -4,7 +4,9 @@
 #include "USBSerial.h"
 
 namespace update_client {
-  
+
+#if defined(UPDATE_DOWNLOAD)
+
 class USBSerialUC {
   
 public:
@@ -28,6 +30,8 @@ private:
   };
   EventFlags m_stopEvent;
 };
+
+#endif
 
 } // namespace
 
