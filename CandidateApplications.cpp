@@ -44,7 +44,7 @@ MbedApplication& CandidateApplications::getMbedApplication(uint32_t slotIndex) {
 }
 
 uint32_t CandidateApplications::getSlotForCandidate() { 
-  
+  // TODO
   return 0;
 }
 
