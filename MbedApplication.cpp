@@ -251,7 +251,8 @@ int32_t MbedApplication::readApplicationHeader() {
     // TODO: the code below MUST be IMPLEMENTED
     switch (m_applicationHeader.headerVersion) {
       case HEADER_VERSION_V2: {
-        // TODO 
+        // TODO : check magic, if successful read the entire header and call parseInternalHeaderV2
+
       }   
       break;
 
@@ -276,8 +277,8 @@ int32_t MbedApplication::readApplicationHeader() {
   return result;
 }
 
-
 int32_t MbedApplication::parseInternalHeaderV2(const uint8_t *pBuffer) {
+  // we expect pBuffer to contain the entire header (version 2)
   int32_t result = UC_ERR_INVALID_HEADER;
 
   if (pBuffer != NULL) {
