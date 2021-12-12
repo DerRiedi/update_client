@@ -101,7 +101,7 @@ int32_t MbedApplication::checkApplication() {
     m_applicationHeader.state = NOT_VALID;
     return result;
   }
-  tr_debug(" Application size is %lld", m_applicationHeader.firmwareSize);
+  tr_debug(" Application size is %lld\n", m_applicationHeader.firmwareSize);
 
   // at this stage, the header is valid
   // calculate hash if slot is not empty
@@ -115,7 +115,7 @@ int32_t MbedApplication::checkApplication() {
     uint32_t remaining = m_applicationHeader.firmwareSize;
     
     // read full image 
-    tr_debug(" Calculating hash (start address 0x%08x, size %lld)", m_applicationAddress, m_applicationHeader.firmwareSize);
+    tr_debug(" Calculating hash (start address 0x%08x, size %lld)\n", m_applicationAddress, m_applicationHeader.firmwareSize);
     while (remaining > 0) {
       // read full buffer or what is remaining 
       uint32_t readSize = (remaining > BUFFER_SIZE) ? BUFFER_SIZE : remaining;
@@ -163,7 +163,7 @@ int32_t MbedApplication::checkApplication() {
 }
   
 void MbedApplication::compareTo(MbedApplication& otherApplication) {
-  tr_debug(" Comparing applications at address 0x%08x and 0x%08x", m_applicationAddress, otherApplication.m_applicationAddress);
+  tr_debug(" Comparing applications at address 0x%08x and 0x%08x\n", m_applicationAddress, otherApplication.m_applicationAddress);
   
   int32_t result = checkApplication();
   if (result != UC_ERR_NONE) {
@@ -175,28 +175,28 @@ void MbedApplication::compareTo(MbedApplication& otherApplication) {
     tr_error(" Other application not valid");
     return;
   }
-  tr_debug(" Both applications are valid");
+  tr_debug(" Both applications are valid\n");
 
   if (m_applicationHeader.magic != otherApplication.m_applicationHeader.magic) {
-    tr_debug("Magic numbers differ");
+    tr_debug("Magic numbers differ\n");
   }
   if (m_applicationHeader.headerVersion != otherApplication.m_applicationHeader.headerVersion) {
-    tr_debug("Header versions differ");
+    tr_debug("Header versions differ\n");
   }
   if (m_applicationHeader.firmwareSize != otherApplication.m_applicationHeader.firmwareSize) {
-    tr_debug("Firmware sizes differ");
+    tr_debug("Firmware sizes differ\n");
   }
   if (m_applicationHeader.firmwareVersion != otherApplication.m_applicationHeader.firmwareVersion) {
-    tr_debug("Firmware versions differ");
+    tr_debug("Firmware versions differ\n");
   }
   if (memcmp(m_applicationHeader.hash, otherApplication.m_applicationHeader.hash, sizeof(m_applicationHeader.hash)) != 0) {
-    tr_debug("Hash differ");
+    tr_debug("Hash differ\n");
   }
   
   if (m_applicationHeader.firmwareSize == otherApplication.m_applicationHeader.firmwareSize) {
-    tr_debug(" Comparing application binaries");
+    tr_debug(" Comparing application binaries\n");
     const uint32_t pageSize = m_flashUpdater.get_page_size();
-    tr_debug("Flash page size is %d", pageSize);
+    tr_debug("Flash page size is %d\n", pageSize);
 
     std::unique_ptr<char> readPageBuffer1 = std::unique_ptr<char>(new char[pageSize]);
     std::unique_ptr<char> readPageBuffer2 = std::unique_ptr<char>(new char[pageSize]);
@@ -227,7 +227,7 @@ void MbedApplication::compareTo(MbedApplication& otherApplication) {
     }
 
     if (binariesMatch) {
-      tr_debug("Application binaries are identical");
+      tr_debug("Application binaries are identical\n");
     }
   }  
 }
@@ -245,16 +245,24 @@ int32_t MbedApplication::readApplicationHeader() {
     // read out header magic
     m_applicationHeader.headerVersion = parseUint32(&version_buffer[4]);
     
-    tr_debug(" Magic %d, Version %d", m_applicationHeader.magic, m_applicationHeader.headerVersion);
+    tr_debug(" Magic %d, Version %d\n", m_applicationHeader.magic, m_applicationHeader.headerVersion);
     
     // choose version to decode 
     // TODO: the code below MUST be IMPLEMENTED
     switch (m_applicationHeader.headerVersion) {
-      case HEADER_VERSION_V2: {
+      case HEADER_VERSION_V2:
         // TODO : check magic, if successful read the entire header and call parseInternalHeaderV2
-
-      }   
-      break;
+        if(m_applicationHeader.magic == HEADER_MAGIC_V2){
+            uint8_t buffer[HEADER_SIZE_V2] = {0}; //initialize everything to zero in the buffer and its size is 0x70 bytes
+            int err = m_flashUpdater.read(buffer, m_applicationHeaderAddress, HEADER_SIZE_V2); //read header into buffer
+            if(err == 0)
+                result = parseInternalHeaderV2(buffer);
+            else {
+                tr_error("Flash read failed: %d", err);
+                result = UC_ERR_READING_FLASH;
+            }
+        }  
+    	break;
 
       // Other firmware header versions can be supported here
       default:
@@ -293,7 +301,7 @@ int32_t MbedApplication::parseInternalHeaderV2(const uint8_t *pBuffer) {
       m_applicationHeader.firmwareVersion = parseUint64(&pBuffer[FIRMWARE_VERSION_OFFSET_V2]);
       m_applicationHeader.firmwareSize = parseUint64(&pBuffer[FIRMWARE_SIZE_OFFSET_V2]);
       
-      tr_debug(" headerVersion %d, firmwareVersion %lld, firmwareSize %lld", 
+      tr_debug(" headerVersion %d, firmwareVersion %lld, firmwareSize %lld\n", 
                m_applicationHeader.headerVersion, m_applicationHeader.firmwareVersion, m_applicationHeader.firmwareSize); 
       
       memcpy(m_applicationHeader.hash, &pBuffer[HASH_OFFSET_V2], SHA256_SIZE);

@@ -1,6 +1,7 @@
 #include "CandidateApplications.h"
 #include "FlashUpdater.h"
 #include "UCErrorCodes.h"
+#include <cstdint>
 
 #if MBED_CONF_MBED_TRACE_ENABLE
 #include "mbed_trace.h"
@@ -45,7 +46,18 @@ MbedApplication& CandidateApplications::getMbedApplication(uint32_t slotIndex) {
 
 uint32_t CandidateApplications::getSlotForCandidate() { 
   // TODO
-  return 0;
+  uint32_t indexOfOldest = 0;
+  for (uint32_t i = 0; i < m_nbrOfSlots; i++){
+      if(!getMbedApplication(i).isValid()){
+          return i;
+      }
+      if(i > 0){
+          if(getMbedApplication(indexOfOldest).isNewerThan(getMbedApplication(i))){
+              indexOfOldest = i;
+          }
+      }
+  }
+  return indexOfOldest;
 }
 
 int32_t CandidateApplications::getApplicationAddress(uint32_t slotIndex, uint32_t& applicationAddress, uint32_t& slotSize) const {
@@ -148,7 +160,21 @@ int32_t CandidateApplications::installApplication(uint32_t slotIndex, uint32_t d
   
   while (nbrOfBytes < copySize) {
     // TODO: read a page from the candidate location and write it to the active application
+    // Read source page
+    memset(writePageBuffer.get(), 0, sizeof(char) * pageSize); 
+    result = m_flashUpdater.readPage(pageSize, writePageBuffer.get(), sourceAddr);
+    if (result != UC_ERR_NONE){
+        tr_error("Error Reading Flash\n\r");
+        return result;
+    }
 
+    // Write destination page
+    result = m_flashUpdater.writePage(pageSize, writePageBuffer.get(), readPageBuffer.get(), destAddr,
+        destSectorErased, destPagesFlashed, nextDestSectorAddress);
+    if (result != UC_ERR_NONE){
+        tr_error("Error Writing Flash\n\r");
+        return result;
+    }
     // update progress
     nbrOfBytes += pageSize;    
 #if MBED_CONF_MBED_TRACE_ENABLE
